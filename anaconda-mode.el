@@ -537,13 +537,23 @@ virtual environment.")
 (defun anaconda-mode-eldoc-format (result)
   "Format eldoc string from RESULT."
   (when result
-    (let* ((name (cdr (assoc 'name result)))
-           (index (or (cdr (assoc 'index result)) 0))
-           (params (cdr (assoc 'params result)))
-           (doc (anaconda-mode-eldoc-format-definition name index params)))
+    (let ((doc (anaconda-mode-eldoc-format-1 result)))
       (if anaconda-mode-eldoc-as-single-line
           (substring doc 0 (min (frame-width) (length doc)))
         doc))))
+
+(defun anaconda-mode-eldoc-format-1 (result)
+  (pcase (cdr (assoc 'type result))
+    (`"sign"
+     (let ((name (cdr (assoc 'name result)))
+           (index (or (cdr (assoc 'index result)) 0))
+           (params (cdr (assoc 'params result))))
+       (anaconda-mode-eldoc-format-definition name index params)))
+    (`"def"
+     (let ((name (cdr (assoc 'name result)))
+           (doc (cdr (assoc 'doc result))))
+       (concat (propertize name 'face 'font-lock-function-name-face)
+               ": " doc)))))
 
 (defun anaconda-mode-eldoc-format-definition (name index params)
   "Format function definition from NAME, INDEX and PARAMS."

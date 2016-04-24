@@ -709,7 +709,8 @@ test(" 6 5 (concat home-directory "simple.py"))
 
 (ert-deftest test-anaconda-mode-eldoc-callback ()
   "Format eldoc string from response."
-  (let ((result '((params "one" "other")
+  (let ((result '((type . "sign")
+                  (params "one" "other")
                   (name . "test")
                   (index . 0))))
     (should (equal "test(one, other)"

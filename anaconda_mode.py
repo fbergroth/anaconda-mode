@@ -8,13 +8,14 @@
     :license: GPL3, see LICENSE for more details.
 """
 
-from __future__ import (
-    absolute_import, unicode_literals, division, print_function)
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import sys
 from functools import wraps
 
-from jedi import Script, NotFoundError
+from jedi import NotFoundError, Script
+
 from service_factory import service_factory
 
 
@@ -87,10 +88,21 @@ def usages(script):
 def eldoc(script):
     """Return eldoc format documentation string or ''."""
 
+    # Pick the first definition with a docstring, looping required for os.path
+    for defn in script.goto_definitions():
+        doc = defn.docstring(raw=True).splitlines()
+        if doc:
+            return {
+                'type': 'def',
+                'name': defn.full_name,
+                'doc': doc[0]
+            }
+
     signatures = script.call_signatures()
     if len(signatures) == 1:
         signature = signatures[0]
         return {
+            'type': 'sign',
             'name': signature.name,
             'index': signature.index,
             'params': [param.description for param in signature.params]
